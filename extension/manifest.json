@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "SafeLinker",
+  "version": "1.1.0",
+  "description": "URL güvenlik analizi yapan Chrome eklentisi.",
+  "permissions": ["storage", "tabs", "activeTab"],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*",
+    "http://127.0.0.1:8010/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "SafeLinker"
+  },
+  "background": {
+    "service_worker": "service_worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["analyzer.js", "content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

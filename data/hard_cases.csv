@@ -1,0 +1,15 @@
+url,label,source,category
+https://accounts.google.com/signin/v2/identifier,benign,hard_case,brand_login
+https://github.com/login,benign,hard_case,brand_login
+https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=123&redirect_uri=https%3A%2F%2Fexample.com,benign,hard_case,oauth
+https://www.paypal.com/signin,benign,hard_case,brand_login
+https://chat.openai.com/auth/login,benign,hard_case,brand_login
+https://example.com/login?next=%2Fdashboard,benign,hard_case,benign_login
+https://accounts.google.com-security-checkup.xyz/login,malicious,hard_case,brand_spoof
+https://micros0ft-login-alert.top/secure/verify,malicious,hard_case,typosquatting
+https://paypa1-account.center/update/login,malicious,hard_case,typosquatting
+http://185.203.119.7/secure/login.php,malicious,hard_case,ip_phishing
+https://bit.ly/3FakeRedirect,malicious,hard_case,shortener
+https://example-security-check.com/login?redirect=http://evil.test,malicious,hard_case,redirect_abuse
+https://client-portal.example.com/download/update.exe,malicious,hard_case,malware_delivery
+https://auth-check-verification.xyz/account/confirm?email=test@example.com,malicious,hard_case,credential_phishing

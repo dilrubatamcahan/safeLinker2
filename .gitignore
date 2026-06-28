@@ -1,0 +1,8 @@
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+.claude/
+backend/__pycache__/
+evaluation_results_deep.csv
+safelinker-report.html

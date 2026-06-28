@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>SafeLinker</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:    #f6f8fa;
+  --s1:    #ffffff;
+  --s2:    #f0f3f6;
+  --s3:    #e4e8ed;
+  --border:#d0d7de;
+  --text:  #1f2328;
+  --text2: #656d76;
+  --text3: #9198a1;
+
+  --safe:   #1a7f37;
+  --low:    #9a6700;
+  --warn:   #bc4c00;
+  --danger: #cf222e;
+  --info:   #0969da;
+
+  --r:8px;
+}
+
+body{
+  width:400px;min-height:440px;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  background:var(--bg);color:var(--text);font-size:13px;
+  overflow-x:hidden;line-height:1.5
+}
+
+/* ── Header ── */
+.header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 14px;background:var(--s1);
+  border-bottom:1px solid var(--border)
+}
+.logo{display:flex;align-items:center;gap:8px}
+.logo-icon{
+  width:24px;height:24px;border-radius:6px;
+  background:var(--info);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;flex-shrink:0
+}
+.logo-text{font-weight:700;font-size:14px;color:var(--text);letter-spacing:-.2px}
+.logo-ver{font-size:10px;color:var(--text3);margin-left:2px}
+.btn-icon{
+  width:24px;height:24px;border:none;background:transparent;
+  color:var(--text3);cursor:pointer;border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+  transition:color .12s,background .12s
+}
+.btn-icon:hover{color:var(--text2);background:var(--s2)}
+
+/* ── Input area ── */
+.input-area{padding:10px 14px;background:var(--s1);border-bottom:1px solid var(--border)}
+.input-row{display:flex;gap:6px}
+.url-input{
+  flex:1;padding:7px 10px;
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:var(--r);color:var(--text);font-size:12px;
+  font-family:inherit;outline:none;min-width:0;
+  transition:border-color .15s
+}
+.url-input:focus{border-color:var(--info);box-shadow:0 0 0 3px rgba(9,105,218,.1)}
+.url-input::placeholder{color:var(--text3)}
+.btn-paste{
+  padding:7px 10px;background:var(--s2);border:1px solid var(--border);
+  border-radius:var(--r);color:var(--text2);cursor:pointer;
+  font-size:11px;font-family:inherit;white-space:nowrap;transition:all .12s
+}
+.btn-paste:hover{background:var(--s3);color:var(--text)}
+.btn-row{display:flex;gap:6px;margin-top:8px}
+.btn-analyze{
+  flex:1;padding:7px 12px;border-radius:var(--r);
+  font-size:12px;font-weight:600;font-family:inherit;
+  cursor:pointer;transition:all .12s
+}
+.btn-primary{background:var(--info);border:1px solid var(--info);color:#fff}
+.btn-primary:hover{background:#0860ca;border-color:#0860ca}
+.btn-secondary{background:transparent;border:1px solid var(--border);color:var(--text2)}
+.btn-secondary:hover{background:var(--s2);color:var(--text)}
+.btn-analyze:disabled{opacity:.35;cursor:not-allowed}
+
+/* ── Tabs ── */
+.tabs{display:flex;background:var(--s1);border-bottom:1px solid var(--border)}
+.tab{
+  flex:1;padding:9px;text-align:center;font-size:12px;font-weight:600;
+  cursor:pointer;color:var(--text3);border-bottom:2px solid transparent;transition:all .12s
+}
+.tab.active{color:var(--info);border-bottom-color:var(--info)}
+.tab:hover:not(.active){color:var(--text2)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* ── Score block (shared) ── */
+.score-block{
+  display:flex;align-items:center;gap:16px;
+  padding:16px 14px 14px;background:var(--s1);
+  border-left:3px solid var(--accent,var(--border))
+}
+.score-left{flex-shrink:0;width:80px}
+.score-num{
+  font-size:44px;font-weight:800;line-height:1;
+  color:var(--accent,var(--text));font-variant-numeric:tabular-nums
+}
+.score-sub{font-size:10px;color:var(--text3);letter-spacing:.3px;margin-top:1px}
+.score-bar-wrap{height:3px;background:var(--s3);border-radius:2px;margin-top:7px;overflow:hidden}
+.score-bar{height:100%;border-radius:2px;background:var(--accent,var(--border));width:0;transition:width 1s cubic-bezier(.4,0,.2,1)}
+.score-right{flex:1;min-width:0}
+.level-pill{
+  display:inline-block;padding:3px 9px;border-radius:4px;
+  font-size:11px;font-weight:700;
+  background:var(--accent-bg,var(--s2));color:var(--accent,var(--text2));
+  margin-bottom:5px
+}
+.domain-text{
+  font-size:13px;font-weight:600;color:var(--text);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+.tag-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.tag{
+  display:inline-flex;align-items:center;
+  padding:2px 7px;border-radius:3px;font-size:10px;font-weight:600;
+  background:var(--s2);color:var(--text3);border:1px solid var(--border)
+}
+.tag-good{background:rgba(26,127,55,.08);color:var(--safe);border-color:rgba(26,127,55,.3)}
+.tag-bad{background:rgba(207,34,46,.08);color:var(--danger);border-color:rgba(207,34,46,.3)}
+.tag-warn{background:rgba(154,103,0,.08);color:var(--low);border-color:rgba(154,103,0,.3)}
+
+/* ════════════════════════════════════════
+   HIZLI ANALİZ — kompakt gösterim
+   ════════════════════════════════════════ */
+
+.verdict-box{
+  padding:12px 14px;background:var(--s1);
+  border-top:1px solid var(--border)
+}
+.verdict-label{
+  font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.7px;color:var(--text3);margin-bottom:4px
+}
+.verdict-text{
+  font-size:13px;color:var(--text);line-height:1.5;
+  font-weight:500
+}
+
+.quick-signals{
+  padding:0 14px 12px;background:var(--s1);
+  border-top:1px solid var(--border)
+}
+.qs-label{
+  font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.7px;color:var(--text3);padding:8px 0 5px
+}
+.qs-item{
+  display:flex;gap:8px;padding:4px 0;font-size:12px;
+  color:var(--text2);line-height:1.45;
+  border-bottom:1px solid var(--s3)
+}
+.qs-item:last-of-type{border-bottom:none}
+.qs-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:5px}
+
+.quick-cta{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;background:var(--s2);
+  border-top:1px solid var(--border);
+  font-size:11px;color:var(--text3);
+  cursor:pointer;transition:background .12s;user-select:none
+}
+.quick-cta:hover{background:var(--s3)}
+.quick-cta strong{color:var(--info);font-weight:600}
+
+/* ════════════════════════════════════════
+   DERİN ANALİZ — tam gösterim
+   ════════════════════════════════════════ */
+
+/* Threat row */
+.threat-row{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 14px;background:var(--bg);
+  border-top:1px solid var(--border);
+  border-left:3px solid var(--t-color,var(--border))
+}
+.threat-icon{flex-shrink:0;width:28px;display:flex;align-items:center;justify-content:center;color:var(--t-color,var(--text3))}
+.threat-body{flex:1;min-width:0}
+.threat-name{font-size:13px;font-weight:700;color:var(--t-color,var(--text))}
+.threat-sub{font-size:10px;color:var(--text3);margin-top:1px}
+.conf-row{display:flex;align-items:center;gap:6px;margin-top:5px}
+.conf-bar-wrap{flex:1;height:2px;background:var(--s3);border-radius:1px;overflow:hidden}
+.conf-bar{height:100%;border-radius:1px;width:0;transition:width 1s ease}
+.conf-pct{font-size:10px;font-weight:700;color:var(--t-color,var(--text3));flex-shrink:0}
+
+/* Collapsible sections */
+.section{border-top:1px solid var(--border)}
+.section-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 14px;cursor:pointer;transition:background .12s;
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--text3);
+  user-select:none;background:var(--s1)
+}
+.section-head:hover{background:var(--s2)}
+.section-head .chevron{font-size:9px;transition:transform .2s;color:var(--text3)}
+.section-head.collapsed .chevron{transform:rotate(-90deg)}
+.section-body{padding:0 14px 10px;background:var(--s1)}
+
+/* Info items */
+.info-item{
+  display:flex;gap:8px;padding:5px 0;font-size:12px;
+  color:var(--text2);line-height:1.45;border-bottom:1px solid var(--s3)
+}
+.info-item:last-child{border-bottom:none}
+.info-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:5px;background:var(--text3)}
+.dot-bad{background:var(--danger)}
+.dot-act{background:var(--info)}
+
+/* Detail grid */
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.detail-cell{padding:5px 0;border-bottom:1px solid var(--s3)}
+.detail-cell:nth-last-child(-n+2){border-bottom:none}
+.dc-key{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:1px}
+.dc-val{font-size:12px;font-weight:600}
+
+/* Signal list */
+.signal-count{
+  font-size:10px;background:var(--s3);
+  padding:1px 6px;border-radius:3px;color:var(--text3)
+}
+.signal-item{
+  display:flex;gap:8px;padding:5px 0;font-size:12px;
+  color:var(--text2);line-height:1.45;border-bottom:1px solid var(--s3)
+}
+.signal-item:last-child{border-bottom:none}
+.signal-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.sig-danger{background:var(--danger)}
+.sig-warn{background:var(--warn)}
+.sig-info{background:var(--info)}
+.sig-good{background:var(--safe)}
+
+/* ── Risk senaryosu bloğu (derin analiz) ── */
+.risk-scenario{border-top:1px solid var(--border);border-left:3px solid var(--rs-color,var(--border))}
+.rs-header{display:flex;align-items:center;gap:8px;padding:11px 14px 8px;background:var(--rs-bg,var(--bg))}
+.rs-icon{flex-shrink:0;display:flex;align-items:center;color:var(--rs-color,var(--text3))}
+.rs-title-wrap{flex:1}
+.rs-title{font-size:12px;font-weight:700;color:var(--rs-color,var(--text2))}
+.rs-subtitle{font-size:10px;color:var(--text3);margin-top:1px}
+.rs-items{padding:0 14px 12px;background:var(--rs-bg,var(--bg))}
+.rs-item{
+  display:flex;gap:9px;padding:6px 0;font-size:12px;
+  color:var(--text);line-height:1.5;
+  border-bottom:1px solid var(--rs-border,var(--s3))
+}
+.rs-item:last-child{border-bottom:none}
+.rs-num{
+  width:18px;height:18px;border-radius:4px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:800;margin-top:1px;
+  background:var(--rs-color,var(--text3));color:#fff;min-width:18px
+}
+
+/* Deep panel */
+.deep-section{border-top:1px solid var(--border);background:rgba(9,105,218,.03)}
+.deep-head{
+  padding:8px 14px;font-size:10px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.7px;color:var(--info)
+}
+.deep-body{padding:0 14px 10px}
+.deep-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:4px 0;border-bottom:1px solid var(--s3);font-size:12px
+}
+.deep-row:last-child{border-bottom:none}
+.dr-key{color:var(--text3)}
+.dr-val{font-weight:600;color:var(--text2)}
+
+/* ── Empty / Loading / Error ── */
+.empty{text-align:center;padding:44px 20px;color:var(--text3)}
+.empty p{font-size:12px}
+.loading{text-align:center;padding:44px 20px}
+.spinner{
+  width:24px;height:24px;border:2px solid var(--s3);
+  border-top-color:var(--info);border-radius:50%;
+  animation:spin .6s linear infinite;margin:0 auto 10px
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error-msg{text-align:center;padding:44px 20px;font-size:12px;color:var(--danger)}
+
+/* ── History ── */
+.history-list{padding:8px;background:var(--s1)}
+.hist-item{
+  display:flex;align-items:center;gap:10px;padding:7px 8px;
+  border-radius:6px;cursor:pointer;transition:background .12s
+}
+.hist-item:hover{background:var(--s2)}
+.hist-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.hist-info{flex:1;min-width:0}
+.hist-host{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.hist-level{font-size:10px;color:var(--text3)}
+.hist-score{font-size:12px;font-weight:700;flex-shrink:0}
+
+/* ── Footer ── */
+.footer{
+  padding:7px 14px;border-top:1px solid var(--border);
+  background:var(--s1);text-align:center;
+  font-size:10px;color:var(--text3)
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5L12 1z"/>
+      </svg>
+    </div>
+    <span class="logo-text">SafeLinker</span>
+    <span class="logo-ver">v4.0</span>
+  </div>
+  <button class="btn-icon" id="clearBtn" title="Temizle">
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  </button>
+</div>
+
+<div class="input-area">
+  <div class="input-row">
+    <input class="url-input" type="text" id="urlInput" placeholder="https://example.com">
+    <button class="btn-paste" id="pasteBtn">Yapıştır</button>
+  </div>
+  <div class="btn-row">
+    <button class="btn-analyze btn-primary" id="analyzeBtn">Hızlı Analiz</button>
+    <button class="btn-analyze btn-secondary" id="deepAnalyzeBtn">Derin Analiz</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-tab="result">Sonuç</div>
+  <div class="tab" data-tab="history">Geçmiş</div>
+</div>
+
+<div class="tab-content active" id="tab-result">
+  <div id="resultBody">
+    <div class="empty"><p>Bir URL girin ve analiz edin</p></div>
+  </div>
+</div>
+
+<div class="tab-content" id="tab-history">
+  <div id="historyPanel">
+    <div class="empty"><p>Henüz kayıt yok</p></div>
+  </div>
+</div>
+
+<div class="footer">Statik kural tabanlı analiz · Gerçek zamanlı tehdit tabanı değildir</div>
+
+<script src="analyzer.js"></script>
+<script src="popup.js"></script>
+</body>
+</html>
